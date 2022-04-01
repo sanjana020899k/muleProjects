@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0aba6a29-28ef-4b2f-91bc-d594ad13ab9c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="set-variableFlow" doc:id="aca64d00-a6a6-4288-ab76-8edb7a451ce0" >
+		<http:listener doc:name="VarlogHTTPin" doc:id="0398bb42-de94-4980-a11e-8900f67ba111" config-ref="HTTP_Listener_config" path="/var">
+			<http:error-response statusCode="200" reasonPhrase="Success" />
+		</http:listener>
+		<set-variable value="MuleSoft" doc:name="Set Variable" doc:id="b0acff25-ab34-4cd6-ac94-c1eb1501261a" variableName="Technology"/>
+		<set-payload value='#["This is " ++ vars.Technology]' doc:name="Set Payload" doc:id="583115b0-b739-45b0-aff1-1b23fed97183" />
+		<logger level="INFO" doc:name="Logger" doc:id="413fc58a-6336-44b3-bb75-a879f12ec398" message="#[payload]"/>
+	</flow>
+</mule>
