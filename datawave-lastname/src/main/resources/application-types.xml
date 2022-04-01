@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="input-properties" format="json">
+      <types:shape format="weave" example="input.json"><![CDATA[%dw 2.0
+
+type input_properties = Array<{|  first_name: String,   last_name: String,   phone: String|}> {"example": "[{\\\"first_name\\\":\\\"Ram\\\",\\\"last_name\\\":\\\"Gupta\\\",\\\"phone\\\":\\\"12345\\\"},{\\\"first_name\\\":\\\"Manohar\\\",\\\"last_name\\\":\\\"Sharma\\\",\\\"phone\\\":\\\"789\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="output-properties" format="json">
+      <types:shape format="weave" example="output.json"><![CDATA[%dw 2.0
+
+type output_properties = Array<{|  first_name: String,   last_name: String,   phone: String|}> {"example": "[{\\\"first_name\\\":\\\"Ram\\\",\\\"last_name\\\":\\\"Gupta\\\",\\\"phone\\\":\\\"12345\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c4164e9e-c2e7-4bb4-9aed-f7ccbb1da8fd">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="input-properties"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="output-properties"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
