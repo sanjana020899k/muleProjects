@@ -1,0 +1,24 @@
+#%RAML 1.0 
+title: employee
+
+uses:
+  types: types/employeeTypes.raml
+  trails: traits/employeeTraits.raml
+
+/employee:
+  get:
+    is: [trails.request-parameter]
+    body:
+      application/json:
+        type: types.person
+    responses:
+      201:
+  put:
+    is: [trails.request-parameter]
+    queryParameters:
+      city: string
+    responses:
+      200:
+        body:
+          application/json:
+  
