@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="authorizationFlow" doc:id="46aaa187-bb48-44c2-a8f7-59f48c7e440a" >
+		<http:listener doc:name="Listener" doc:id="495562d6-5b94-4378-a42a-c485174a7782" config-ref="HTTP_Listener_config" path="/access_token" allowedMethods="GET"/>
+		<file:read doc:name="Read Access Token" doc:id="b23810af-d309-4af7-9128-eb63c41494ef" config-ref="File_Config" path="C:\Users\Acer\OneDrive\Documents\Authorization\access_token.csv" outputMimeType="application/csv; streaming=true; header=true"/>
+		<ee:transform doc:name="Map Response" doc:id="397f18aa-4cbd-4d29-995b-ada339714cbf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"access_token": payload.access_token[0]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
