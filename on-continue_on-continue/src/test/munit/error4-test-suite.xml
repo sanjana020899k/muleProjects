@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="error4-test-suite.xml" />
+	<munit:test name="error4-test-suite-errorcontinuewithpropogateFlowTest" doc:id="3d09bd1f-a217-4bb7-902f-e2d8ec1abb6e" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to errorcontinuewithpropogateFlow" doc:id="c9a4e06e-407f-4767-8dee-8318429bae7b" name="errorcontinuewithpropogateFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1ac23709-bb7d-46f3-85bf-ca7a7f3dc773" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="error4-test-suite-errorcontinuewithpropogateFlow1Test" doc:id="6b7e88ac-5c32-435a-8266-9aadf429cef3" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to errorcontinuewithpropogateFlow1" doc:id="fa52d21f-4c4c-4632-8f91-1e846486693b" name="errorcontinuewithpropogateFlow1"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7b0beb97-87e9-427c-b503-3c6463bd2273" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

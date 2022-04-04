@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+xmlns="http://www.mulesoft.org/schema/mule/core"
+xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="22c08a14-fb1f-4b48-b507-0c653f5145ef" >
+<http:listener-connection host="0.0.0.0" port="8081" />
+</http:listener-config>
+<flow name="errorcontinuewithpropogateFlow" doc:id="26359fe9-5f3d-4dc5-9143-5b77b272a09a" >
+<http:listener doc:name="Listener" doc:id="d1862cc7-d44a-4f28-b1fa-14a8d1d886c8" config-ref="HTTP_Listener_config" path="/error"/>
+<flow-ref doc:name="Flow Reference" doc:id="eee3ede7-6c1e-4526-bbfa-3cc173dca98b" name="errorcontinuewithpropogateFlow1"/>
+<set-payload value="success-main flow" doc:name="Succes main flow" doc:id="6e9e7cc8-253b-4603-9e30-8ff94b5e104b" />
+<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c783e90b-9ded-4f06-bb64-6bb6f34e77ea" >
+				<set-payload value="error chid flow" doc:name="error chid flow" doc:id="f8106463-ab82-4ff8-ac72-d63f3a204df1" />
+			</on-error-continue>
+
+
+</error-handler>
+</flow>
+<flow name="errorcontinuewithpropogateFlow1" doc:id="4887f2e4-8bbd-4a37-a2bd-2597b1b12b80" >
+<ee:transform doc:name="Transform Message" doc:id="8388ec99-3e5f-4755-993f-70573b02ca71" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+<set-payload value="success child flow " doc:name="success child flow " doc:id="c5b7f1a7-53a6-4d79-9c3f-b1f2e7f00bcc" />
+<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ada32567-d00d-4a02-be28-3743c6cd3809" >
+				<set-payload value="error main flow" doc:name="error main flow" doc:id="2d143696-946b-490a-b5b1-c3f8c985ac9f" />
+			</on-error-continue>
+
+</error-handler>
+</flow>
+</mule>
