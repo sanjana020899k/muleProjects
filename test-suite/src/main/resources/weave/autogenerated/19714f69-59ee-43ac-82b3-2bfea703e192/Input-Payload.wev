@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_19714f69_59ee_43ac_82b3_2bfea703e192_Input_Payload = {|
+  name: String | Null, 
+  age: String | Null
+|}
+

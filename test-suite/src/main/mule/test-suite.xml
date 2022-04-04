@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7a3e2954-9a59-49d1-abf2-0c92a2b9f285" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="test-suiteFlow" doc:id="a82a943c-7c5d-4091-9588-b951cc8a7cf3" >
+		<http:listener doc:name="Listener" doc:id="1484e6c4-7b1d-44dc-ad53-732031f7b431" config-ref="HTTP_Listener_config" path="/suite"/>
+		<logger level="INFO" doc:name="Logger" doc:id="cb05b55b-804b-4994-8aa0-829dd49d1e37" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="f7d64c1e-952b-4670-aee6-4633bb867973" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: attributes.queryParams.name,
+	age: attributes.queryParams.age
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="6dac0cae-9c5d-411e-9671-59965c3a19a3" >
+			<when expression="#[payload.age&gt;18]">
+				<flow-ref doc:name="Flow Reference" doc:id="eafb88f4-8d16-4920-9ce6-78dd2e17ce21" name="Eligible"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="Flow Reference" doc:id="38b0cf35-390a-469e-8aaa-5c4a1e497507" name="Ineligible"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="Eligible" doc:id="19714f69-59ee-43ac-82b3-2bfea703e192" >
+		<logger level="INFO" doc:name="Logger" doc:id="8c7a22a7-9086-4e44-8f8d-dfc073de093d" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="e9355a25-04bd-4a22-9617-0cdf69a75873" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: payload.name,
+	age: payload.age,
+	eligible: true
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Ineligible" doc:id="2eab9fe5-62ad-4488-a248-63b22a9012c1" >
+		<logger level="INFO" doc:name="Logger" doc:id="f79b6160-b922-4ae7-a84a-7ce513fd7753" />
+		<ee:transform doc:name="Transform Message" doc:id="12b7ae44-6f20-40dc-8311-326f0a33f9fe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: payload.name,
+	age: payload.age,
+	eligible: false
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

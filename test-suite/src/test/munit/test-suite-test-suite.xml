@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="test-suite-test-suite.xml" />
+	<munit:test name="test-suite-test-suite-test-suiteFlowTest" doc:id="c52d807d-cada-4aa0-b526-f43950887d45" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="79c0ab6f-e23c-48a2-a2a6-bbd0d82abde2" >
+				<munit:attributes value="#[{'queryParams':{'name':'Sanjana','age':23}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to test-suiteFlow" doc:id="55f73bc0-61d0-4b04-ba65-271673f076fd" name="test-suiteFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="987d0d30-34c2-4dc8-bb74-6a586d1478bf" expression="#[payload]" is="#[MunitTools::equalTo({name: payload.name, age: payload.age, eligible: true})]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="test-suite-test-suiteTest" doc:id="5f135388-c98f-4e20-a563-ad52d16f7768" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="5801692c-cc4c-4fec-a708-70559c08254b" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Flow Reference" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[{name: "Sanjana",age: 23,eligible: true}]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d5e03055-ebac-422e-8994-cd2b0b856e92" >
+				<munit:attributes value="#[{'queryParams':{'name':'Sanjana','age':23}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to test-suiteFlow" doc:id="1142f92a-c4cf-4ba0-a764-20f5902a1d75" name="test-suiteFlow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="b957a263-3077-44c2-9972-73517a94565e" expression="#[payload]" is="#[MunitTools::equalTo({name: payload.name, age: payload.age, eligible: false})]" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
