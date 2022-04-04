@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule 
+xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<http:listener-config name="api-httpListenerConfig">
+        <http:listener-connection host="${http.host}" port="${http.port}"/>
+    </http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="9104c0bb-33a9-4298-a90c-b3dfc7985b0a" file="dev.yaml" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="3a7c766a-f584-4f89-b2f4-0d75a9149cf1" >
+		<http:request-connection host="payload44.us-e2.cloudhub.io" port="80" />
+	</http:request-config>
+	
+</mule>
