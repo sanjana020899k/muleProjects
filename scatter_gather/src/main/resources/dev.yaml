@@ -1,0 +1,4 @@
+http:
+  host: "log-response.us-e2.cloudhub.io"
+  port: "80"
+  

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="02aa07ca-fc9a-448d-99da-d8509d594547" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Doraemon@1067" database="employee"/>
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a82c3f93-f2bc-4d95-95dd-c69dd470e7d2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="scattergatherFlow" doc:id="6481d53a-9a40-4b87-953f-ddf6f4d10597" >
+		<http:listener doc:name="Listener" doc:id="3ab80934-9124-477c-89d0-396d5ed723b8" config-ref="HTTP_Listener_config" path="/scatter"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4f5e5508-0eac-4587-83db-4fcd14807641" message="#[payload]"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="998575ac-cb92-43cd-9002-f8faf8c15bc8" >
+			<route >
+				<http:request method="POST" doc:name="Request" doc:id="abea05dc-aa57-4851-b12c-72ff026f4538" config-ref="HTTP_Request_configuration" path="/ack">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"auth-token" : "1426"
+}]]]></http:headers>
+				</http:request>
+			</route>
+			<route >
+				<db:insert doc:name="Insert" doc:id="a089a2a7-ae16-43ac-822f-8546af195b1d" config-ref="Database_Config">
+					<db:sql ><![CDATA[insert into employeess values(:id,:name,:city)]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	id: payload.id,
+	name: payload.name,
+	city: payload.city
+}]]]></db:input-parameters>
+				</db:insert>
+				<ee:transform doc:name="Transform Message" doc:id="c47445a3-42cb-4b8f-b854-29134e3bbac2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"result": "Success"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="ed5fb1b4-3fd3-4c05-9b37-e77673cbf1de">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"api-response": payload."0".payload,
+	"database-response": payload."1".payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="fd4868b8-6e45-4036-9f26-71f0f9f9e871" message="payload"/>
+	</flow>
+</mule>
