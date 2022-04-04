@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="object-storeFlow" doc:id="f927c31d-c1ab-4442-a835-b328d9d89b64" >
+		<http:listener doc:name="Listener" doc:id="299ea31a-e8ca-4772-9c49-61e7b8dadfee" config-ref="HTTP_Listener_config" path="/company/customer"/>
+		<os:retrieve doc:name="Access Token" doc:id="f8b763bb-d423-4ef4-8b4d-1428cf4042d6" key='#["access_token"]' target="accessToken">
+			<os:default-value ><![CDATA[#[""]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="29c77158-d0a6-4869-b154-12a538aeee83" message="Access token read from object store"/>
+		<try doc:name="Try" doc:id="ad51bc91-71a9-434c-bff0-ec228f4cc0fc" >
+			<flow-ref doc:name="request-customer-subflow" doc:id="f317a3e2-705c-41b9-9975-c8bc5a79853e" name="request-customer-subflow" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c07346ab-ae28-40c2-a4ec-a6ca621f7c69" type="HTTP:UNAUTHORIZED">
+					<logger level="INFO" doc:name="Logger" doc:id="684672d0-1b65-4b03-a593-b31f0a28b0f0" message="In Error Continue -&gt; Unauthorized Access Token"/>
+					<http:request method="GET" doc:name="Get Access Token" doc:id="8fe70c2e-2532-4775-9968-d32e0c5e7a1b" config-ref="HTTP_Request_configuration" path="/access_token" targetValue="#[payload.access_token]" target="accessToken"/>
+					<os:store doc:name="Store Access Token" doc:id="a1f8faf7-f043-420a-8d66-8fd83a4ceb8d" key='#["access_token"]'>
+						<os:value ><![CDATA[#[vars.accessToken]]]></os:value>
+					</os:store>
+					<logger level="INFO" doc:name="Logger" doc:id="25f32189-cdf1-4739-b830-6f783a55e947" message="Access token has been stored in object store"/>
+					<flow-ref doc:name="request-customer-subflow" doc:id="1c3f0b2e-7e87-48db-88db-f73f970ba3f8" name="request-customer-subflow"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+	<sub-flow name="request-customer-subflow" doc:id="424eb593-0047-402e-9460-d10079681cae" >
+		<http:request method="POST" doc:name="/Customer api using access token" doc:id="b3794db5-b6a2-46fe-b2fc-2485be8f58db" config-ref="HTTP_Request_configuration_api" path="/api/customer">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"authorization" : vars.accessToken,
+	"Content-Type": "application/json"
+}]]]></http:headers>
+		</http:request>
+	</sub-flow>
+</mule>
