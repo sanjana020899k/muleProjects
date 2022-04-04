@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:websocket="http://www.mulesoft.org/schema/mule/websocket" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/websocket http://www.mulesoft.org/schema/mule/websocket/current/mule-websocket.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	
+	<http:listener-config name="HTTP_Listener_config3" doc:name="HTTP Listener config" doc:id="f1f1da02-59cd-4018-a760-435dab215677" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="e5663ad6-c5b7-4c31-8d5d-54209358549b" />
+	<websocket:config name="WebSockets_Config" doc:name="WebSockets Config" doc:id="7ce436a4-85b0-47b6-8940-0e48dd8df5c7" >
+		<websocket:connection >
+			<websocket:server-settings listenerBasePath="/wsserver" listenerConfig="HTTP_Listener_config3" />
+		</websocket:connection>
+	</websocket:config>
+	<flow name="mulesy-websocket-server-new-connection-Flow" doc:id="c99d3894-762f-49d6-b23e-76291663cdc3" >
+		<websocket:on-inbound-connection doc:name="On New Inbound Connection-Connect" doc:id="fb4406d2-24c5-42a8-86ea-adb5b153e093" path="/matchfeed" config-ref="WebSockets_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="65ec77f5-b742-4fb4-83a9-5a69368293f2" message="connection request received from socket id #[attributes.socketId]" />
+		<choice doc:name="Choice" doc:id="0b970c4c-701f-4829-9de0-e64fd34f8c3b" >
+			<when expression='#[attributes.headers.authorization_key == "admin@12345"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="46e1b861-7a47-4eb0-9701-485434a295ac" message="Authentication successfull for socket id #[attributes.socketId]"/>
+				<websocket:send doc:name="Send" doc:id="044d38d6-0d9c-45f9-9f78-9cbb7924ad3c" socketId="#[attributes.socketId]" config-ref="WebSockets_Config">
+					<websocket:content ><![CDATA[#["connection successful"]]]></websocket:content>
+				</websocket:send>
+			</when>
+			<otherwise >
+				<websocket:close-socket doc:name="Close socket" doc:id="e82e6614-3e07-4c72-ac37-dc0f960fe22a" socketId='#[attributes.socketId]' reason='#["UnAuthorized"]' config-ref="WebSockets_Config"/>
+				<logger level="INFO" doc:name="Logger" doc:id="44ccd0b8-a7b1-4508-af0c-34a559c76f10" message="Unauthorized socket id #[attributes.socketId], closing the connection"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="mulesy-websocket-server-new-subscription-Flow" doc:id="df6efe2e-4bdf-422c-abd5-cd52bfd46d7b" >
+		<websocket:inbound-listener doc:name="On New Inbound Message-Connect" doc:id="73a0c3bb-a89a-4251-a6e1-259c49d1f3b9" path="/matchfeed" config-ref="WebSockets_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="6d223340-c764-4e37-9ac4-d1aa2e2dca45" message='#["Subscription requested from " ++ attributes.socketId ++ " for the match id 12345"]' />
+		<ee:transform doc:name="Transform Message-to-json-object" doc:id="f6a9fa50-a808-4858-938a-65a512d87d90" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+output application/json
+---
+read(payload,"application/json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="1c401fc1-9c3e-4942-ab30-75b010532549" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	client_name : payload.client_name,
+	socket_id: attributes.socketId as String	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="Store" doc:id="b2d64794-f06e-4dec-b1fc-9eaa7ead8dee" key='#[payload.client_name]' objectStore="Object_store">
+			<os:value ><![CDATA[#[payload.socket_id]]]></os:value>
+		</os:store>
+	</flow>
+	<flow name="mulesy-websocket-server-send-match-feed-Flow" doc:id="4e8e0b9e-8f4e-473a-a046-9be0d3fab1d3" >
+		<http:listener doc:name="Listener" doc:id="d347964b-a459-4054-a221-7dd64f2445a8" config-ref="HTTP_Listener_config3" path="/triggerfeed" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message-match feed" doc:id="54100edb-e15a-41ce-8bc0-71f74e7e14cb">
+						<ee:message>
+						</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="feed" ><![CDATA[%dw 2.0
+output application/json
+---
+
+[
+{id:"1", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"0", player2_score:"1"},
+{id:"2", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"1"},
+{id:"3", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"2"},
+{id:"4", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"3"},
+{id:"5", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"4"},
+{id:"6", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"5"},
+{id:"7", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"1", player2_score:"6"},
+{id:"8", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"2", player2_score:"6"},
+{id:"9", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"3", player2_score:"6"},
+{id:"10", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"4", player2_score:"6"},
+{id:"11", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"5", player2_score:"6"},
+{id:"12", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"5", player2_score:"7"},
+{id:"13", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"5", player2_score:"8"},
+{id:"14", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"5", player2_score:"9"},
+{id:"15", event_id :"123", match_id : 12345, player1:"Player 1", player2: "Player 2", player1_score:"5", player2_score:"10"}
+
+
+
+	
+]]]></ee:set-variable>
+			</ee:variables>
+					</ee:transform>
+		<os:retrieve-all doc:name="Retrieve all" doc:id="39742b78-ac77-419d-9b84-02a931c911b1" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message-list-clients" doc:id="14fbfa0a-e722-449c-88ae-e92152818094" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="clients" ><![CDATA[%dw 2.0
+output application/json
+---
+payload pluck() -> {socket_id: $}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each feed" doc:id="a0ed5236-51d7-42c6-9502-e31045b72a8e" collection="#[vars.feed]">
+			<set-variable value="#[payload]" doc:name="Set Variable feed_data" doc:id="eca40cd1-5df8-4fcf-a3a8-5becae9690fd" variableName="feed_data"/>
+			<foreach doc:name="For Each client" doc:id="c4ff7a68-d2e6-4a6b-8199-131f206179d2" collection="#[vars.clients]">
+				<async doc:name="Async" doc:id="8ae165bf-b27b-4766-9eaf-a93f79c3f692" >
+					<websocket:send doc:name="Send" doc:id="dcf98efd-c7d1-498b-b8b0-130a9d1ce3b3" socketId="#[payload.socket_id]" config-ref="WebSockets_Config">
+						<websocket:content ><![CDATA[#[vars.feed_data]]]></websocket:content>
+					</websocket:send>
+					<logger level="INFO" doc:name="Logger" doc:id="e6479942-5ed1-4527-b7d9-5fd66d4ed030" message='#["sent feed to socket id- " ++ payload.socket_id]'/>
+				</async>
+			</foreach>
+			<ee:transform doc:name="Transform Message-wait" doc:id="ebb14073-0562-4fbb-afab-1cec41c1bdbf">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+{ "user" : 1 } wait 5000 ]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="4e8447c6-c3de-4b18-8477-5f738fad38fc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Feed sent to clients"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="mulesy-websocket-server-close-socket-Flow" doc:id="de28c9ae-1641-48de-a139-a8a71c39453f" >
+		<http:listener doc:name="Listener" doc:id="5567cf2f-1666-44f5-be1f-dcc22d50bda9" config-ref="HTTP_Listener_config3" path="/close"/>
+		<os:retrieve-all doc:name="Retrieve all" doc:id="0df739c8-6aa4-4f72-87a8-55654fbaff85" objectStore="Object_store" />
+		<ee:transform doc:name="Transform Message-list-clients" doc:id="04a530cb-25b2-4c8b-816b-1e212fb9645f" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="clients" ><![CDATA[%dw 2.0
+output application/json
+---
+payload pluck() -> {client_name: $$}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each client" doc:id="12d57b42-c600-4860-84b3-cdc51b62bfe7" collection="#[vars.clients]">
+			<websocket:close-socket doc:name="Close socket" doc:id="a199545d-5f4d-4e7f-9916-744876fd799e" socketId="#[payload.socket_id]" reason='#["Match Finished"]' config-ref="WebSockets_Config"/>
+			<os:remove doc:name="Remove from objectstore" doc:id="3097fc08-f3c0-44fa-bcfc-ea2653f91d20" key="#[payload.socket_id]" objectStore="Object_store"/>
+			<logger level="INFO" doc:name="Logger" doc:id="54accc2e-b480-447b-880e-3301b39b5c48" message='#["connection closed for the socket id -" ++ payload.socket_id]'/>
+		</foreach>
+	</flow>
+</mule>
