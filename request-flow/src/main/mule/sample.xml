@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="56707812-9cd1-4f96-9d9a-40b14dbffc0f" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Doraemon@1067" database="employee" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d0b01519-ea5f-4680-80dd-d60a74f27ce8" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="43788f63-ed5d-466a-89a4-b85746236073" >
+		<http:request-connection host="localhost" port="8082" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="4136e1fa-ed8e-4a5f-83be-03c886351cfd" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="sampleFlow" doc:id="9dc10d31-0377-43cf-a94b-5ca63ac281b3" >
+		<http:listener doc:name="Listener" doc:id="8d3f9d09-ba71-4cc4-a19e-abcf05ce933a" path="/test" config-ref="HTTP_Listener_config"/>
+		<set-payload value="payload" doc:name="Set Payload" doc:id="9b55720f-37b8-4667-a6f8-e9df9141836b" />
+		<set-variable value="test variable" doc:name="Set Variable" doc:id="33f954fa-cb13-4bc9-b93c-06d69f89bde6" variableName="var1"/>
+		<db:select doc:id="4baafe21-c5fe-45e2-9fe6-ec13964ac7f2" config-ref="Database_Config">
+			<db:sql ><![CDATA[select name from employeess;]]></db:sql>
+		</db:select>
+		<http:request method="POST" doc:name="Request" doc:id="625598ce-f285-4795-92e5-7098b1515217" config-ref="HTTP_Request_configuration" path="/test1"/>
+		<ee:transform doc:name="Transform Message" doc:id="10344155-a065-4b4c-88bd-512992f10186" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1cd2a39e-79ab-4b39-8e12-c77836afd7b3" message="Flow1 #[vars.var1] #[attributes.queryParams.name] #[payload]"/>
+	</flow>
+	<flow name="sampleFlow1" doc:id="3822edbe-e96c-485e-b39d-118de61f7aaf" >
+		<http:listener doc:name="Listener" doc:id="bf972ca0-ad63-4e1e-8344-98987c90deae" config-ref="HTTP_Listener_config1" path="/test1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="1cdc57d8-c36b-4dc7-96f2-9fd8dc43d415" message="#[vars.var1] #[attributes.queryParams.name] #[payload]"/>
+	</flow>
+</mule>
