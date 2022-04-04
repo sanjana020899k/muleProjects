@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7c9064fc-6331-49cd-9d8c-5a2541a8d713" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<json:config name="JSON_Config" doc:name="JSON Config" doc:id="6f962d14-d785-4ffc-a730-67aacf789118" />
+	<flow name="json-validation-apiFlow" doc:id="beb318e3-10db-4447-9567-52a0d2fe7845" >
+		<http:listener doc:name="Listener" doc:id="1f232a78-88cf-45ae-9f93-e0c906b2e9c8" config-ref="HTTP_Listener_config" path="json" >
+			<http:response statusCode="#[vars.httpStatus]" />
+		</http:listener>
+		<json:validate-schema doc:name="Validate schema" doc:id="dd45c934-1d45-48c6-8954-df43ba43ceb1" schema="json-schema.json" dereferencing="INLINE" allowArbitraryPrecision="true" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="de94dd3a-1a87-4ec3-aa20-81b09046a9e8" >
+				<ee:transform doc:name="Transform Message" doc:id="5e459dde-e87d-4c70-b737-d49b8167bee8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload filter($.level == "error") map {
+
+	"Error $$": {
+		element: $.instance.pointer,
+		message: $.message
+	}
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
