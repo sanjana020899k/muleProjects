@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sum-numbers-test-suite.xml" />
+	<munit:test name="sum-numbers-test-suite-sum-numbersFlowTest" doc:id="13312499-6208-435a-993d-e5f1acb03368" description="Test">
+		<munit:behavior >
+			<set-payload value='#[{&#10;    "a": 5,&#10;    "b": 3&#10;}]' doc:name="Set Payload" doc:id="0005f00a-1f72-48b0-a302-27c1350936f7" mimeType="application/json"/>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sum-numbersFlow" doc:id="fc9fdab6-a3e6-4be0-a606-14b6ff9347b9" name="sum-numbersFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="eee2400b-21c2-43c6-ac73-d3da7fd55848" expression="#[payload.sum]" is="#[MunitTools::equalTo(8)]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
