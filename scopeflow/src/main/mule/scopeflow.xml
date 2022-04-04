@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fd16413b-e34e-4bf9-8652-9352b812cf17" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="scopeFlow" doc:id="803b2124-a1d7-42a0-a9b8-e7583cf2efc7" >
+		<http:listener doc:name="Listener" doc:id="c32faeb3-0cb3-4b12-ab7d-f1645acd5ebd" config-ref="HTTP_Listener_config" path="/scope"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f4093b4a-10eb-42c1-80f1-a3e239489916" message="#['Hello World']"/>
+		<flow-ref doc:name="Flow Reference" doc:id="c783b0de-a6e8-4ac8-905b-f2d38d8a34fc" name="privateFlow"/>
+	</flow>
+	<flow name="privateFlow" doc:id="275314c1-7318-47cf-bfac-6bc2e8999f24" >
+		<logger level="INFO" doc:name="Logger" doc:id="b6602320-f08f-4985-8414-f0ad3da7f1f7" message="#['Response from private flow']"/>
+	</flow>
+	<sub-flow name="subFlow" doc:id="8b11ffdb-3d5f-41f0-b2d4-4bf55f368587" >
+		<set-payload value="#['In sub flow']" doc:name="Set Payload" doc:id="8259b974-39a7-4771-9042-55a01c400d9c" />
+		<logger level="INFO" doc:name="Logger" doc:id="64d69ab4-2b05-4a69-9f1f-e48307d7fa03" message="#[payload]"/>
+	</sub-flow>
+</mule>
