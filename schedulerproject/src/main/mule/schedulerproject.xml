@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="scedulerprojectFlow" doc:id="15cd0269-81d6-464d-a322-5b35cedb515f" >
+		<scheduler doc:name="Scheduler" doc:id="3cb5bf00-3923-45d2-9346-8f5ff261ba5c" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="${scheduler.frequency}" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<http:request method="GET" doc:name="Request cloudhub api" doc:id="e64f7903-57d3-4681-925c-e8ff5bdf6a55" config-ref="HTTP_Request_configuration" path="${ack.path}"/>
+		<logger level="INFO" doc:name="Log Payload" doc:id="459affdc-c681-477b-95a6-339814975650" message="started_scheduling=#[payload]"/>
+	</flow>
+</mule>

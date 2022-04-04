@@ -1,0 +1,8 @@
+http:
+  host: "payload44.us-e2.cloudhub.io"
+  port: "80"
+  
+scheduler:
+  frequency: "5"  
+  
+  
