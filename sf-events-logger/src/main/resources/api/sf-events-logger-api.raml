@@ -1,0 +1,61 @@
+#%RAML 1.0
+title: Salesforce Event Logger
+
+version: 1.0
+
+# Array of all protocols that your API supports
+protocols: [ HTTPS ]
+documentation: 
+  - !include docs/intro.raml
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/ff056318-b950-4a38-b5ba-cdecd8b58cea/api # baseUri: https://localhost:8081/api
+
+mediaType: [ application/json ]
+
+uses:
+  trait: /exchange_modules/6d8578b0-4f72-4f67-bb1e-deb9db070f8a/pgx-common-traits/1.0.0/pgx-common-traits.raml
+  dt: libraries/dataTypes.raml
+  rt: resourceTypes/resourceTypesLibrary.raml
+  
+securitySchemes:
+  basic: !include /exchange_modules/6d8578b0-4f72-4f67-bb1e-deb9db070f8a/pgx-basic-auth-security-scheme/1.0.0/pgx-basic-auth-security-scheme.raml
+
+/health-check:
+  description: Endpoint to check the health of the API
+  displayName: Health Check
+  get:
+    description: Returns information about the health of the implementation and its dependencies
+    displayName: Get Health Check
+    responses:
+      200:
+        body:
+          application/json:
+            example: { "status": "ok"}        
+              
+/log-event:
+  displayName: Log Event
+  type:
+    rt.common:
+      example-1: !include examples/resource1GETSuccess200.json
+      error400json: !include examples/errorExamples/error400.json
+      error401json: !include examples/errorExamples/error401.json
+      error403json: !include examples/errorExamples/error403.json
+      error404json: !include examples/errorExamples/error404.json
+      error405json: !include examples/errorExamples/error405.json
+      error406json: !include examples/errorExamples/error406.json
+      error415json: !include examples/errorExamples/error415.json
+      error429json: !include examples/errorExamples/error429.json
+      error500json: !include examples/errorExamples/error500.json
+      error502json: !include examples/errorExamples/error502.json
+      error503json: !include examples/errorExamples/error503.json 
+
+  post:
+    description: This endpoint is used to post the events to the salesforce objects
+    is:  [trait.tracked, trait.client-id-required] 
+    body:
+      application/json:
+        type: !include dataTypes/requests/log-event-in-sf-request.raml    
+    responses:
+      201:
+        body:
+          application/json:
+            type: !include dataTypes/responses/log-event-in-sf-response.raml
