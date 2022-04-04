@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="b8403e1e-11c3-470c-9731-c480d67ef7ae" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="00cafc08-1b4e-4c91-94c0-05f6e8b102fc" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="4d9cf9c2-f97c-4a50-a562-ab58e7e2bc5c" >
+		<http:request-connection host="localhost" port="8082" />
+	</http:request-config>
+	<flow name="sample3Flow" doc:id="2fa8d225-babd-413a-be9c-572bfe227aaf" >
+		<scheduler doc:name="Scheduler" doc:id="84dfa3e1-f4a8-4c36-8340-c690e7e7d94b" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-payload value='#[["Apple", "Banana"]]' doc:name="Set Payload" doc:id="3a150872-94cd-4e1f-86d1-39b4b2d62810" />
+		<batch:job jobName="sample3Batch_Job" doc:id="73f16ffe-8e01-40a2-8173-491ead0fce4c" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="942c8a0f-04b5-4610-b6c8-05bcbc05571e" acceptExpression='#[(payload)=="Apple"]'>
+					<set-payload value='#[payload ++ "1"]' doc:name="Set Payload" doc:id="d1de3188-b894-492b-9979-e7ade143be4e" />
+					<logger level="INFO" doc:name="Logger" doc:id="6ad23801-5cc2-43fa-b862-bce157677b39" message="#[payload]"/>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="3e3bf11f-7805-46a1-a2e1-12fab70c86a8">
+					<set-payload value='#[payload ++ "2"]' doc:name="Set Payload" doc:id="d713ccbd-2ea5-4b09-8fcf-615a8a59b29a" />
+					<logger level="INFO" doc:name="Logger" doc:id="2faba5c3-cc61-4a8e-9055-d055dd24f0e6" message="#[payload]"/>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="656a5713-acef-43a8-97e4-342df6738771" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
