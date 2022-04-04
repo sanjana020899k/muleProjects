@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8ca2147a-c94b-4e18-b918-efde2dca9e26" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="python-scriptFlow" doc:id="04ab5abb-881c-4476-b8f8-7fc698db4fdf" >
+		<http:listener doc:name="Listener" doc:id="07f9c896-a6e5-4bd2-9739-7a17a169e460" config-ref="HTTP_Listener_config" path="/python"/>
+		<ee:transform doc:name="Transform Message" doc:id="cb6bdb18-0b06-4542-9f73-d2d9bf083292" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "EmployeeDetails": {
+        "EmpId": "1234",
+        "FirstName": "Sachin",
+        "LastName": "Tendulkar"
+    }
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<scripting:execute engine="jython" doc:name="Execute" doc:id="5aac2a25-e0fd-4d87-9fc3-23e41a494c2e" >
+			<scripting:code ><![CDATA[result=len(FirstName) + len(LastName)
+]]></scripting:code>
+			<scripting:parameters ><![CDATA[#[{FirstName: payload.EmployeeDetails.FirstName,LastName:payload.EmployeeDetails.LastName}]]]></scripting:parameters>
+		</scripting:execute>
+		<ee:transform doc:name="Transform Message" doc:id="3d49bf2e-1c1c-44d5-83f7-7b246e532fc3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Total Length": payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2b3cf9bb-f752-4df9-b5e6-2fcdec8a5f96" message="#[payload]"/>
+	</flow>
+</mule>
