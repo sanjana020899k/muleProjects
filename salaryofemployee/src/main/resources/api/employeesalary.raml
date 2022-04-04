@@ -1,0 +1,15 @@
+#%RAML 1.0
+title: employeeSalary
+
+uses:
+  types: types/empsalary.raml
+  traits: traits/authTraits.raml
+
+/employee:
+  get:
+    is: [traits.request-parameter]
+    responses:
+      200:
+        body:
+          application/json:
+                    
