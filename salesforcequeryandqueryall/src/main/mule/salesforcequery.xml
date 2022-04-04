@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1c36c07e-87f2-4cf9-96b5-b6ceb07f01e3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="6b3f97c3-d767-48ec-9c5b-b28a10797492" >
+		<salesforce:basic-connection username="sanjana.k@empathetic-hawk-aapk28.com" password="doreamon476" securityToken="BQp5DI2VyJpX2FZxgCgI8Tpg" />
+	</salesforce:sfdc-config>
+	<flow name="salesforcequery" doc:id="c40ea224-0ee7-49ff-809a-2be58abd03c1" >
+		<http:listener doc:name="Listener" doc:id="3f4ce248-12a1-44a3-bf33-b739649eb488" config-ref="HTTP_Listener_config" path="/contact" />
+		<set-variable doc:name="Set Variable" doc:id="a906d649-1966-4368-b884-e5e90255555e" variableName="LastNameVar" value="#[attributes.queryParams.LastName default '']"/>
+		<choice doc:name="Choice" doc:id="528a2901-44a4-4a60-b0af-94fe1bd08dab" >
+			<when expression="#[vars.LastNameVar != '']" >
+				<salesforce:query doc:name="Query" doc:id="7a0604b5-06cc-4fb9-ac14-1e0db485d590" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[Select FirstName,LastName,Email from Contact where LastName=':LastName']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	LastName : vars.LastNameVar
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<otherwise>
+				<salesforce:query-all doc:name="Query all" doc:id="1072c543-5682-49e3-bf2f-0455a03a8f0d" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query><![CDATA[Select FirstName,LastName,Email from Contact]]></salesforce:salesforce-query>
+				</salesforce:query-all>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="97cf6476-686d-4894-941f-1cc9d68b0ff7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
