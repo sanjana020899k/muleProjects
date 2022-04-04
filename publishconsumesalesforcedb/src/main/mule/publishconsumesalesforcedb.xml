@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="publishconsumesalesforcedbFlow" doc:id="0749f066-e277-4ee9-9435-c9d9c24891ae" >
+		<http:listener doc:name="Listener" doc:id="95f9d3c5-b597-48c4-94f6-58ff7cd32f55" config-ref="HTTP_Listener_config" path="/publishconsume"/>
+		<ee:transform doc:name="Set Response" doc:id="a8c0826e-2fc9-4805-a907-256aa17dbc7c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Published successfully!!"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish Record Details" doc:id="7c1245b7-18ab-467d-b82a-b6018ee0bd8b" config-ref="JMS_Config" destination="MESSAGE_QUEUE">
+			<jms:message >
+				<jms:body ><![CDATA[#[{
+	FirstName: "Bill",
+	LastName: "Gates",
+	Email: "gatesbill@gmail.com"
+}]]]></jms:body>
+			</jms:message>
+		</jms:publish>
+	</flow>
+	<flow name="publishconsumesalesforcedbFlow1" doc:id="52f5f155-29f9-4acd-98d0-cc76e148216f" >
+		<jms:listener doc:name="On New Message" doc:id="b32339c1-0987-4a8e-ad81-0150fb5d8ccc" config-ref="JMS_Config" destination="MESSAGE_QUEUE">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Log Payload" doc:id="4c02206e-2764-4944-b4a2-6dbcad9f4b40" message="#[payload]"/>
+		<ee:transform doc:name="Map Payload" doc:id="5edd5118-4852-480f-bbb5-8292ec9efac2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	FirstName: payload.FirstName,
+	LastName: payload.LastName,
+	Email: payload.Email
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert into Salesforce" doc:id="a0bec8b6-58aa-432f-a1ff-f962784ac20c" config-ref="Salesforce_Config" objectType="Contact" externalIdFieldName="Email"/>
+		<ee:transform doc:name="Set Response" doc:id="64bf1c46-59ae-4686-8a52-fe50bd862ceb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="publishconsumesalesforcedbFlow2" doc:id="070e5fed-744e-4638-a521-b8e6b59f1473" >
+		<jms:listener doc:name="On New Message" doc:id="ec49517f-ec0e-4f09-a420-95bcbc87cf4c" config-ref="JMS_Config" destination="MESSAGE_QUEUE"/>
+		<logger level="INFO" doc:name="Log Payload" doc:id="eb53aaaf-e27f-4adf-8f93-8a94792a73c8" message="#[payload]"/>
+		<ee:transform doc:name="Map Payload" doc:id="34afcd74-f849-4e7c-a699-984e0d4b6251" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	FirstName: payload.FirstName,
+	LastName: payload.LastName,
+	Email: payload.Email
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert into Database" doc:id="730fff97-0979-47a6-888f-09f383d2c3a7" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into contact values(:FirstName,:LastName,:Email)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Set Response" doc:id="dd673dcf-0c23-409d-be3d-c184f4eed0bb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

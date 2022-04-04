@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="publishconsumesalesforcedb-test-suite.xml" />
+	<munit:test name="publishconsumesalesforcedb-test-suite-publishconsumesalesforcedbFlowTest" doc:id="d6e58843-0f8c-4498-b22a-14471a0e4b6e" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to publishconsumesalesforcedbFlow" doc:id="8e7bf0a0-4ffd-4dc6-ab66-7b27356302f3" name="publishconsumesalesforcedbFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="bdf99e08-9a4d-42d9-93db-71d88e2b667e" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="publishconsumesalesforcedb-test-suite-publishconsumesalesforcedbFlow1Test" doc:id="fc99c4d4-1393-445e-947c-1c6e6f90d730" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to publishconsumesalesforcedbFlow1" doc:id="b0d10abb-0506-47f9-83ec-9db1133642ab" name="publishconsumesalesforcedbFlow1"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="48aaecb6-5006-43ee-8738-23d6a8381b19" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="publishconsumesalesforcedb-test-suite-publishconsumesalesforcedbFlow2Test" doc:id="4933711e-6373-46f6-be2d-6ab54b8600a4" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to publishconsumesalesforcedbFlow2" doc:id="2d96af9d-d36d-4593-a040-b96467a7ae0c" name="publishconsumesalesforcedbFlow2"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="f9a69a39-3493-4e0d-af03-fed4791a7538" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
