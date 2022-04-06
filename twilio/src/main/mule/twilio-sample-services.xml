@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:twilio-connector="http://www.mulesoft.org/schema/mule/twilio-connector"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/twilio-connector http://www.mulesoft.org/schema/mule/twilio-connector/current/mule-twilio-connector.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c85bfd00-ebc7-4481-9ce0-be193037a724" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<twilio-connector:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="93263d0a-ebc1-4427-8a01-b65116dcd5f8" property_username="AC6dba2f87069b2b40ab39cb8dade470bc" property_password="9eb21bafbca839d8d0e1ec71a296abec" />
+	<flow name="twilio-sample-servicesFlow" doc:id="f2db5c4e-af17-446c-b700-f0b7b66e6c57" >
+		<http:listener doc:name="Listener" doc:id="43d04656-cc0b-4366-b82b-6b858ac94d9b" config-ref="HTTP_Listener_config" path="/sendMessage"/>
+		<ee:transform doc:name="Transform Message" doc:id="fee8ca1a-d62d-440f-ac01-e2b74e4d61d7">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="TextMessage" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    Body: "Hello this is mules team send you test message",
+    From: "+17406968981",
+    To: "+919110690863"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<twilio-connector:send-message doc:name="Send Message" doc:id="372e64b9-8f0c-400e-bd7b-c2490361cfe7" config-ref="Twilio_Connector_Config" account-sid="AC6dba2f87069b2b40ab39cb8dade470bc">
+			<twilio-connector:send-message-request-data ><![CDATA[#[vars.TextMessage]]]></twilio-connector:send-message-request-data>
+		</twilio-connector:send-message>
+		<ee:transform doc:name="Transform Message" doc:id="961256fc-374e-4c5c-980d-f680fe4d384a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

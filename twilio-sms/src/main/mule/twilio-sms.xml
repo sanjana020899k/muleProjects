@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:twilio-connector="http://www.mulesoft.org/schema/mule/twilio-connector" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/twilio-connector http://www.mulesoft.org/schema/mule/twilio-connector/current/mule-twilio-connector.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6d68deee-4069-4ed2-873e-70a69f2766fd" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<twilio-connector:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="9dc8862d-f67f-4a6e-a9b3-bcf9fb62d2b4" property_username="AC6dba2f87069b2b40ab39cb8dade470bc" property_password="9eb21bafbca839d8d0e1ec71a296abec" />
+	<flow name="twilio-smsFlow" doc:id="0545388f-c66e-4449-bd94-95555c2e971d" >
+		<http:listener doc:name="Listener" doc:id="a56fec80-8a78-434b-9e13-39b045ef4b3a" config-ref="HTTP_Listener_config" path="/sms"/>
+		<ee:transform doc:name="Transform Message" doc:id="b6288be2-3b43-441f-a6d2-c3329de61a5b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    Body: "Hello this is mules team send you test message",
+    From: "+17406968981",
+    To: "+919110690863"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<twilio-connector:send-message doc:name="Send Message" doc:id="1c7542bb-7aa6-4f71-ba4e-53d564fe8c28" config-ref="Twilio_Connector_Config" account-sid="AC6dba2f87069b2b40ab39cb8dade470bc"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c75dc48d-0e44-4b5e-8833-786a8f107594" message="#[payload]"/>
+	</flow>
+</mule>
