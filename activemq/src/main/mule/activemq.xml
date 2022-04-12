@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="123076f1-1a35-40af-9576-626b57e7564a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="7510f10a-053b-4a96-89d6-d8a87c9c0574" >
+		<jms:active-mq-connection username="admin" password="admin" >
+			<jms:caching-strategy >
+				<jms:no-caching />
+			</jms:caching-strategy>
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<flow name="activemqFlow" doc:id="9b5e31f3-5717-4aac-a8a3-b699990df0fd" >
+		<http:listener doc:name="Listener" doc:id="32eac085-664d-49e6-b7bb-c5711596ea46" config-ref="HTTP_Listener_config" path="mq"/>
+		<logger level="INFO" doc:name="Logger" doc:id="88f2a5ce-a2f5-458a-a886-ab58e66bfa72" message="Message Received"/>
+		<jms:publish doc:name="Publish" doc:id="c703abac-1ef7-4b4b-8fa2-6db68fb91d74" destination="demo1" config-ref="JMS_Config"/>
+	</flow>
+	<flow name="activemqFlow1" doc:id="7f7fbb22-b49c-4788-bfc6-a8ddd4f613ad" >
+		<scheduler doc:name="Scheduler" doc:id="f00c9c79-06c3-4947-949b-2bb842e75be9" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<jms:consume doc:name="Consume" doc:id="e91e9994-6ce5-48d9-a5ba-0337aa64d6b1" config-ref="JMS_Config" destination="ActiveMQ.DLQ"/>
+		<logger level="INFO" doc:name="Logger" doc:id="85f800dd-7e9d-4b34-957e-f7b08a981650" message="Incoming Message --- #[payload]"/>
+	</flow>
+</mule>
