@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/schema/mule/oauth2-provider/current/mule-oauth2-provider.xsd">
+	<flow name="calculator-apiFlow" doc:id="6450a8f9-f7fd-4c96-a23c-594893e694d6" >
+		<http:listener doc:name="Http Listener" doc:id="6db654ea-b4c4-43fb-8bef-ac58a2f08c3e" config-ref="HTTP_Listener_config" path="/calculate/{operator}"/>
+		<oauth2-provider:create-client doc:name="Create client" doc:id="f9003928-7926-4607-a085-451381a8e2a4" config-ref="OAuth2_Provider_Config" clientId="#[attributes.headers.client_id]" type="CONFIDENTIAL" secret="#[attributes.headers.client_secret]" clientName="#[attributes.headers.client_name]" description='#[""]' principal='#[""]' redirectUris='#[["abc.com"]]' authorizedGrantTypes='#[["CLIENT_CREDENTIALS"]]' failIfPresent="true"/>
+		<set-variable value='#[attributes.uriParams."operator"]' doc:name="Set Operator" doc:id="dd71b129-a57a-4a99-bcfc-6893b13000f0" variableName="operator"/>
+		<ee:transform doc:name="Set response" doc:id="2b1aff54-51d8-4a05-ae44-a17707453075" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	(sum: payload.num1 + payload.num2) if (vars.operator == "sum" or vars.operator == "all"),
+	(difference: payload.num1 - payload.num2) if (vars.operator == "difference" or vars.operator == "all"),
+    (product: payload.num1 * payload.num2) if (vars.operator == "product" or vars.operator == "all"),
+    (quotient: payload.num1 / payload.num2) if (vars.operator == "quotient" or vars.operator == "all")
+ }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5a4c5708-497b-4ce2-b456-f37e4c15f8f5" >
+				<ee:transform doc:name="Transform Message" doc:id="83389eed-382a-4a41-8059-810f614767d1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="calculator-apiFlow1" doc:id="f7c71c7d-c408-4b8b-b682-5c8640e802b9" >
+		<http:listener doc:name="Http Listener" doc:id="220eba66-a1ec-4eb3-a7e3-867642bd2177" config-ref="HTTP_Listener_config" path="/validate"/>
+		<oauth2-provider:validate-token doc:name="Validate token" doc:id="3168d34b-a2d2-42be-b20e-53c5f1e0f9ae" config-ref="OAuth2_Provider_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="ab92b6fd-2dd4-44fc-a35c-0dba2b324b1d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
