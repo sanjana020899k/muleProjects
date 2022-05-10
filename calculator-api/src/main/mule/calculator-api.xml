@@ -25,7 +25,7 @@ output application/json
 		</ee:transform>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5a4c5708-497b-4ce2-b456-f37e4c15f8f5" >
-				<ee:transform doc:name="Transform Message" doc:id="83389eed-382a-4a41-8059-810f614767d1" >
+				<ee:transform doc:name="Error Message" doc:id="83389eed-382a-4a41-8059-810f614767d1" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <munit:config name="calculatorapi-apikit-test.xml" />
+    <http:request-config name="HTTP_Request_Configuration" basePath="/api">
+        <http:request-connection host="localhost" port="8081" />
+    </http:request-config>
+    <munit:test name="post:\quotient:application\json:calculatorapi-config-200--FlowTest" description="Verifying functionality of [post:\quotient:application\json:calculatorapi-config-200-]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="calculatorapi-main" />
+            <munit:enable-flow-source value="post:\quotient:application\json:calculatorapi-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_quotient_application_json.json')]" />
+        </munit:behavior>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/quotient">
+                <http:body ><![CDATA[{ "num1": 6, "num2":3 }]]></http:body>
+				<http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\product:application\json:calculatorapi-config-200--FlowTest" description="Verifying functionality of [post:\product:application\json:calculatorapi-config-200-]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="calculatorapi-main" />
+            <munit:enable-flow-source value="post:\product:application\json:calculatorapi-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_product_application_json.json')]" />
+        </munit:behavior>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/product">
+                <http:body ><![CDATA[{ "num1": 6, "num2":3 }]]></http:body>
+				<http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\difference:application\json:calculatorapi-config-200--FlowTest" description="Verifying functionality of [post:\difference:application\json:calculatorapi-config-200-]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="calculatorapi-main" />
+            <munit:enable-flow-source value="post:\difference:application\json:calculatorapi-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_difference_application_json.json')]" />
+        </munit:behavior>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/difference">
+                <http:body ><![CDATA[{ "num1": 6, "num2":3 }]]></http:body>
+				<http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\sum:application\json:calculatorapi-config-200--FlowTest" description="Verifying functionality of [post:\sum:application\json:calculatorapi-config-200-]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="calculatorapi-main" />
+            <munit:enable-flow-source value="post:\sum:application\json:calculatorapi-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_sum_application_json.json')]" />
+        </munit:behavior>
+        <munit:execution>
+            <http:request config-ref="HTTP_Request_Configuration" method="POST" path="/sum">
+                <http:body ><![CDATA[{ "num1": 6, "num2":3 }]]></http:body>
+				<http:headers><![CDATA[#[{"Content-Type":"application/json"}]]]></http:headers>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
+        </munit:validation>
+    </munit:test>
+	<munit:test name="calculatorapi-test-suite-calculatorapi-consoleTest" doc:id="7b74c957-1176-490e-a1f9-70455b9136a0" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ba71ff87-cd38-494f-b22c-c0fa31051af6" processor="on-error-propagate" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="APIKIT:NOT_FOUND" attributeName="type" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0 output application/json --- {message: "Resource not found"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="49939b10-86eb-471b-8ffc-288d1ce6be5d" >
+				<flow-ref doc:name="Flow-ref to calculatorapi-console" doc:id="75dd0e01-4505-4d73-adff-0d53a061ace0" name="calculatorapi-console" />
+				<error-handler >
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b1e06341-1eb2-4001-98ec-204f1c93c8e4" type="APIKIT:NOT_FOUND" >
+						<ee:transform doc:name="Transform Message" doc:id="503d519d-ddfc-420c-8b4d-fb9f7718af74" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</on-error-propagate>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="4df32292-e22e-41f9-ae7c-8c61b265681b" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="calculatorapi-test-suite-calculatorapi-mainTest" doc:id="9114c55f-1d5c-4276-859a-ae57cc181f49" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3642bd7e-75aa-4c7c-ae62-2746c6b9fec6" processor="on-error-propagate" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="APIKIT:NOT_FOUND" attributeName="type" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0 output application/json --- {message: "Bad request"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="c6cc5bda-913a-467a-ace5-addb3d9e406a" >
+				<flow-ref doc:name="Flow-ref to calculatorapi-main" doc:id="73a7a7a1-dc43-4bd8-8e14-da7c3afef729" name="calculatorapi-main" />
+				<error-handler >
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a049abe3-e3b0-4bc5-8f90-a926fb718796" type="APIKIT:BAD_REQUEST" >
+						<ee:transform doc:name="Transform Message" doc:id="94e55722-b24a-4ec9-96d9-89775d5b7933" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</on-error-propagate>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="56118023-3405-403e-8085-58d98da1c6d8" />
+		</munit:validation>
+	</munit:test>
+</mule>
